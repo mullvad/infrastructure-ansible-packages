@@ -3,15 +3,15 @@ Ansible installation packages used by the Infrastructure Team
 
 # Building
 
-Use the `build` script to automatically download and build the desired version of Ansible
+Use the `build-ansible` script to automatically download and build the desired version of Ansible
 
 Run it with:
 
-`./build <version>`
+`./build-ansible <version>`
 
 For example:
 
-`./build 2.13.3`
+`./build-build v2.13.3`
 
 This will download, build an Ansible .tar.gz package that can be installed on any server to run Ansible locally
 

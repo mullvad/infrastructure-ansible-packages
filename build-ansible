@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+# USAGE:
+# ./build-ansible <VERSION>
+# Where VERSION is a tag, commit or branch from the official Ansible repository.
+#
+# EXAMPLES:
+# ./build-ansible stable-2.12
+# ./build-ansible v.2.13.4
+
+ANSIBLE_VERSION=$1
+WORKING_DIR=ansible
+
+_ARCHIVE_FILEPATH="${WORKING_DIR}/ansible-${ANSIBLE_VERSION}.tar.gz"
+ARCHIVE_FILEPATH="$(sed 's/stable-//g; s/v//g' <<< $_ARCHIVE_FILEPATH)"	# stable-2.12 -> 2.12, v2.12 -> 2.12
+ARCHIVE_SIGNATURE_FILEPATH="${ARCHIVE_FILEPATH}.gpg"
+ARCHIVE_URL="https://github.com/ansible/ansible/archive/${ANSIBLE_VERSION}.tar.gz"
+
+SYMLINK_LATEST_ARCHIVE="${WORKING_DIR}/ansible-latest.tar.gz"
+SYMLINK_LATEST_ARCHIVE_SIGNATURE="${SYMLINK_LATEST_ARCHIVE}.gpg"
+
+mkdir -p $WORKING_DIR
+
+echo "[#] Downloading Ansible ${ANSIBLE_VERSION} -> ${ARCHIVE_FILEPATH}"
+if ! wget $ARCHIVE_URL --quiet -O $ARCHIVE_FILEPATH; then
+	echo "[!] Could not download ${ARCHIVE_URL}"
+	exit 1
+fi
+
+echo "[#] Signing ${ARCHIVE_FILEPATH} -> ${ARCHIVE_SIGNATURE_FILEPATH}"
+gpg2 --detach-sign --armor $ARCHIVE_FILEPATH > $ARCHIVE_SIGNATURE_FILEPATH
+
+echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE} -> $ARCHIVE_FILEPATH"
+ln --force -r -s $ARCHIVE_FILEPATH $SYMLINK_LATEST_ARCHIVE
+
+echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE_SIGNATURE} -> $ARCHIVE_SIGNATURE_FILEPATH"
+ln --force -r -s $ARCHIVE_SIGNATURE_FILEPATH $SYMLINK_LATEST_ARCHIVE_SIGNATURE
