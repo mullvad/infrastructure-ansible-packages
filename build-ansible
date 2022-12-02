@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
 # USAGE:
-# ./build-ansible <VERSION>
+# ./build-ansible <VERSION> --no-link
 # Where VERSION is a tag, commit or branch from the official Ansible repository.
+# --no-link is an optional flag that skips symlinking this package to 'latest'.
 #
 # EXAMPLES:
 # ./build-ansible stable-2.12
@@ -30,8 +31,10 @@ fi
 echo "[#] Signing ${ARCHIVE_FILEPATH} -> ${ARCHIVE_SIGNATURE_FILEPATH}"
 gpg2 --detach-sign --armor $ARCHIVE_FILEPATH > $ARCHIVE_SIGNATURE_FILEPATH
 
-echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE} -> $ARCHIVE_FILEPATH"
-ln --force -r -s $ARCHIVE_FILEPATH $SYMLINK_LATEST_ARCHIVE
+if ! [[ "$2" = "--no-link" ]]; then
+	echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE} -> $ARCHIVE_FILEPATH"
+	ln --force -r -s $ARCHIVE_FILEPATH $SYMLINK_LATEST_ARCHIVE
 
-echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE_SIGNATURE} -> $ARCHIVE_SIGNATURE_FILEPATH"
-ln --force -r -s $ARCHIVE_SIGNATURE_FILEPATH $SYMLINK_LATEST_ARCHIVE_SIGNATURE
+	echo "[#] Symlinking ${SYMLINK_LATEST_ARCHIVE_SIGNATURE} -> $ARCHIVE_SIGNATURE_FILEPATH"
+	ln --force -r -s $ARCHIVE_SIGNATURE_FILEPATH $SYMLINK_LATEST_ARCHIVE_SIGNATURE
+fi
